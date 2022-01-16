@@ -1,0 +1,69 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; since the parameters that go here are not all obvious.
+;
+; Format:
+;   [section] ; section goes between []
+;   param=value ; assign values to parameters
+
+config_version=4
+
+_global_script_classes=[ {
+"base": "Reference",
+"class": "DiscordActivity",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_activity.gdns"
+}, {
+"base": "",
+"class": "DiscordActivityAssets",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_activity_assets.gdns"
+}, {
+"base": "Reference",
+"class": "DiscordActivityManager",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_activity_manager.gdns"
+}, {
+"base": "",
+"class": "DiscordActivitySecrets",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_activity_secrets.gdns"
+}, {
+"base": "",
+"class": "DiscordCore",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_core.gdns"
+}, {
+"base": "",
+"class": "DiscordOverlayManager",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_overlay_manager.gdns"
+}, {
+"base": "",
+"class": "DiscordResult",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_result.gdns"
+} ]
+_global_script_class_icons={
+"DiscordActivity": "",
+"DiscordActivityAssets": "",
+"DiscordActivityManager": "",
+"DiscordActivitySecrets": "",
+"DiscordCore": "",
+"DiscordOverlayManager": "",
+"DiscordResult": ""
+}
+
+[application]
+
+config/name="GodotSteamAPI"
+run/main_scene="res://addons/discord_sdk/examples/example.tscn"
+config/icon="res://icon.png"
+
+[autoload]
+
+Discord="*res://addons/discord_sdk/discord.gd"
+
+[editor_plugins]
+
+enabled=PoolStringArray(  )
