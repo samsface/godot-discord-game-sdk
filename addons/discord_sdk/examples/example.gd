@@ -13,10 +13,24 @@ func _ready():
 	assets.set_small_image("capsule_main")
 	assets.set_small_text("ZONE 2 WOOO")
 	
+	var lobby_manager = Discord.get_lobby_manager()
+	var transaction = DiscordLobbyTransaction.new()
+	lobby_manager.get_lobby_create_transaction(transaction)
+	
+	
+	transaction.set_capacity(6)
+	transaction.set_type(Discord.LobbyType.Public)
+	transaction.set_metadata("a", "123");
+
+	var create_lobby_res = yield(lobby_manager.create_lobby(transaction), "result")
+	if create_lobby_res.result == Discord.Result.Ok:
+		var lobby = create_lobby_res.data
+		print(lobby.get_id())
+	
 	var activity_manager = Discord.get_activity_manager()
 	if activity_manager:
 		var res = activity_manager.register_steam(1435470)
-		var clear = yield(activity_manager.clear_activity(), "result")
+		var clear = yield(activity_manager.clear_activity(), "result").result
 		#var res = activity_manager.register_command("echo sam")
 
 		var res2 = yield(activity_manager.update_activity(activity), "result")

@@ -59,6 +59,11 @@ enum ActivityActionType {
 	Spectate,
 };
 
+enum LobbyType {
+	Private = 1,
+	Public,
+};
+
 class Activity:
 	var data_ := DiscordActivity.new()
 	
@@ -96,4 +101,9 @@ func get_activity_manager() -> DiscordActivityManager:
 func get_overlay_manager() -> DiscordOverlayManager:
 	if discore_core_:
 		return discore_core_.get_overlay_manager()
+	return null
+
+func get_lobby_manager() -> DiscordLobbyManager:
+	if discore_core_:
+		return discore_core_.get_lobby_manager()
 	return null

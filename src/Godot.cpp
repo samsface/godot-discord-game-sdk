@@ -12,9 +12,14 @@ class DiscordResult : public Reference
     GODOT_CLASS(DiscordResult, Reference)
 
 public:
+    int result_{};
+    Variant data_{};
+
     static void _register_methods()
     {
-        register_signal<DiscordResult>("result", "result", GODOT_VARIANT_TYPE_INT);
+        register_property("result", &DiscordResult::result_, {});
+        register_property("data", &DiscordResult::data_, {});
+        register_signal<DiscordResult>("result", "result", GODOT_VARIANT_TYPE_OBJECT);
     }
 
     void _init()
@@ -30,62 +35,113 @@ struct result_callback
     {
     }
 
-    void operator()(discord::Result result)
+    template<typename ...Args>
+    void operator()(discord::Result result, Args...)
     {
-        data->emit_signal("result", static_cast<int>(result));
+        data->result_ = static_cast<int>(result);
+        data->emit_signal("result", data);
     }
 };
 
-class DiscordActivityAssets : public Reference
+template<typename GT, typename DT>
+class discord_to_godot_t : public Reference
 {
-    GODOT_CLASS(DiscordActivityAssets, Reference)
+public:
+    using discord_type = DT;
+    using godot_type = GT;
 
-    discord::ActivityAssets* data_{};
+protected:
+    discord_type* data_{};
 
 public:
+
     auto const& data()
     {
         return data_;
     }
 
-    void set_large_image(String value)
+    template<typename op, typename ...Args>
+    auto call(op o, Args ...args)
     {
+        using x = decltype(std::invoke(o, data_, std::forward<Args>(args)...));
+
+        if constexpr(std::is_same<x, discord::Result>::value)
+        {
+            auto res{discord::Result::InternalError};
+
+            if(data_)
+            {
+                res = std::invoke(o, data_, std::forward<Args>(args)...);
+            }
+
+            return static_cast<int>(res);
+        }
+        else if constexpr(std::is_same<x, void>::value)
+        {
+           std::invoke(o, data_, std::forward<Args>(args)...);
+        }
+        else
+        {
+            if(data_)
+            {
+                return std::invoke(o, data_, std::forward<Args>(args)...);
+            }
+            else
+            {
+                return x{};
+            }
+        }
+    }
+
+    template<typename op, typename ...Args>
+    auto callback(op o, Args ...args)
+    {
+        result_callback callback;
+
         if(data_)
         {
-            data_->SetLargeImage(value.utf8().get_data());
+            std::invoke(o, data_, std::forward<Args>(args)..., callback);
         }
+
+        return callback.data;
+    }
+
+    static auto bind(discord_type& type)
+    {
+        Ref<godot_type> res{godot_type::_new()};
+        res->data_ = &type;
+
+        return res;
+    }
+
+    void _init()
+    {
+    }
+};
+
+class DiscordActivityAssets : public discord_to_godot_t<DiscordActivityAssets, discord::ActivityAssets>
+{
+    GODOT_CLASS(DiscordActivityAssets, Reference)
+
+public:
+    void set_large_image(String value)
+    {
+        call(&discord_type::SetLargeImage, value.utf8().get_data());
     }
 
     void set_large_text(String value)
     {
-        if(data_)
-        {
-            data_->SetLargeText(value.utf8().get_data());
-        }
+        call(&discord_type::SetLargeText, value.utf8().get_data());
     }
 
     void set_small_image(String value)
     {
-        if(data_)
-        {
-            data_->SetSmallImage(value.utf8().get_data());
-        }
+        call(&discord_type::SetSmallImage, value.utf8().get_data());
     }
 
     void set_small_text(String value)
     {
-        if(data_)
-        {
-            data_->SetSmallText(value.utf8().get_data());
-        }
-    }
-
-    static auto bind(discord::ActivityAssets& activity_assets)
-    {
-        Ref<DiscordActivityAssets> res{DiscordActivityAssets::_new()};
-        res->data_ = &activity_assets;
-
-        return res;
+        call(&discord_type::SetSmallText, value.utf8().get_data());
     }
 
     static void _register_methods()
@@ -101,48 +157,24 @@ public:
     }
 };
 
-class DiscordActivitySecrets : public Reference
+class DiscordActivitySecrets : public discord_to_godot_t<DiscordActivitySecrets, discord::ActivitySecrets>
 {
     GODOT_CLASS(DiscordActivitySecrets, Reference)
 
-    discord::ActivitySecrets* data_{};
-
 public:
-    auto const& data()
-    {
-        return data_;
-    }
-
     void set_match(String value)
     {
-        if(data_)
-        {
-            data_->SetMatch(value.utf8().get_data());
-        }
+        call(&discord_type::SetMatch, value.utf8().get_data());
     }
 
     void set_join(String value)
     {
-        if(data_)
-        {
-            data_->SetJoin(value.utf8().get_data());
-        }
+        call(&discord_type::SetJoin, value.utf8().get_data());
     }
 
     void set_spectate(String value)
     {
-        if(data_)
-        {
-            data_->SetSpectate(value.utf8().get_data());
-        }
-    }
-
-    static auto bind(discord::ActivitySecrets& activity_secrets)
-    {
-        Ref<DiscordActivitySecrets> res{DiscordActivitySecrets::_new()};
-        res->data_ = &activity_secrets;
-
-        return res;
+        call(&discord_type::SetSpectate, value.utf8().get_data());
     }
 
     static void _register_methods()
@@ -150,10 +182,6 @@ public:
         register_method("set_match", &DiscordActivitySecrets::set_match);
         register_method("set_join", &DiscordActivitySecrets::set_join);
         register_method("set_spectate", &DiscordActivitySecrets::set_spectate);
-    }
-
-    void _init()
-    {
     }
 };
 
@@ -164,7 +192,7 @@ class DiscordActivity : public Reference
     discord::Activity data_;
 
 public:
-    auto const& data()
+    auto const& data() const
     {
         return data_;
     }
@@ -226,63 +254,29 @@ public:
     }
 };
 
-class DiscordActivityManager : public Reference
+class DiscordActivityManager : public discord_to_godot_t<DiscordActivityManager, discord::ActivityManager>
 {
     GODOT_CLASS(DiscordActivityManager, Reference)
 
-    discord::ActivityManager* data_{};
-
 public:
-    int register_command(String value)
+    auto register_command(String value)
     {
-        if(data_)
-        {
-            return static_cast<int>(data_->RegisterCommand(value.utf8().get_data()));
-        }
-
-        return 1;
+        return call(&discord_type::RegisterCommand, value.utf8().get_data());
     }
 
-    int register_steam(int steam_app_id)
+    auto register_steam(int steam_app_id)
     {
-        if(data_)
-        {
-            return static_cast<int>(data_->RegisterSteam(steam_app_id));
-        }
-
-        return 1;
+        return call(&discord_type::RegisterSteam, steam_app_id);
     }
 
     auto update_activity(Ref<DiscordActivity> activity)
     {
-        result_callback callback;
-
-        if(data_)
-        {
-            data_->UpdateActivity(activity->data(), callback);
-        }
-
-        return callback.data;
+        return callback(&discord_type::UpdateActivity, activity->data());
     }
 
     auto clear_activity()
     {
-        result_callback callback;
-
-        if(data_)
-        {
-            data_->ClearActivity(callback);
-        }
-
-        return callback.data;
-    }
-
-    static Ref<DiscordActivityManager> make(discord::ActivityManager& activity_manager)
-    {
-        Ref<DiscordActivityManager> res{DiscordActivityManager::_new()};
-        res->data_ = &activity_manager;
-
-        return res;
+        return callback(&discord_type::ClearActivity);
     }
 
     static void _register_methods()
@@ -292,61 +286,28 @@ public:
         register_method("update_activity", &DiscordActivityManager::update_activity);
         register_method("clear_activity", &DiscordActivityManager::clear_activity);
     }
-
-    void _init()
-    {
-    }
 };
 
-class DiscordOverlayManager : public Reference
+class DiscordOverlayManager : public discord_to_godot_t<DiscordOverlayManager, discord::OverlayManager>
 {
     GODOT_CLASS(DiscordOverlayManager, Reference)
-
-    discord::OverlayManager* data_{};
 
 public:
     auto set_locked(bool value)
     {
-        result_callback callback;
-
-        if(data_)
-        {
-            data_->SetLocked(value, callback);
-        }
-
-        return callback.data;
+        return callback(&discord_type::SetLocked, value);
     }
 
     auto is_enabled()
     {
         bool res{};
-    
-        if(data_)
-        {
-            data_->IsEnabled(&res); 
-        }
-
+        call(&discord_type::IsEnabled, &res);
         return res;
     }
 
     auto open_activity_invite(int type)
     {
-        result_callback callback;
-    
-        if(data_)
-        {
-            data_->OpenActivityInvite(static_cast<discord::ActivityActionType>(type), callback); 
-        }
-
-        return callback.data;
-    }
-
-    static Ref<DiscordOverlayManager> make(discord::OverlayManager& data)
-    {
-        Ref<DiscordOverlayManager> res{DiscordOverlayManager::_new()};
-        res->data_ = &data;
-
-        return res;
+        return callback(&discord_type::OpenActivityInvite, static_cast<discord::ActivityActionType>(type));
     }
 
     static void _register_methods()
@@ -355,9 +316,233 @@ public:
         register_method("is_enabled", &DiscordOverlayManager::is_enabled);
         register_method("open_activity_invite", &DiscordOverlayManager::open_activity_invite);
     }
+};
+
+class DiscordLobbyTransaction : public Reference
+{
+    GODOT_CLASS(DiscordLobbyTransaction, Reference)
+
+    discord::LobbyTransaction data_;
+
+public:
+    auto& data()
+    {
+        return data_;
+    }
+
+    auto set_type(int value)
+    {
+        return static_cast<int>(data_.SetType(static_cast<discord::LobbyType>(value)));
+    }
+
+    auto set_owner(std::int64_t value)
+    {
+        return static_cast<int>(data_.SetOwner(value));
+    }
+
+    auto set_capacity(std::uint32_t value)
+    {
+        return static_cast<int>(data_.SetCapacity(value));
+    }
+
+    auto set_metadata(String key, String value)
+    {
+        return static_cast<int>(data_.SetMetadata(key.utf8().get_data(), value.utf8().get_data()));
+    }
+
+    auto delete_metadata(String key)
+    {
+        return static_cast<int>(data_.DeleteMetadata(key.utf8().get_data()));
+    }
+
+    auto set_locked(bool value)
+    {
+        return static_cast<int>(data_.SetLocked(value));
+    }
+
+    static void _register_methods()
+    {
+        register_method("set_type", &DiscordLobbyTransaction::set_type);
+        register_method("set_owner", &DiscordLobbyTransaction::set_owner);
+        register_method("set_capacity", &DiscordLobbyTransaction::set_capacity);
+        register_method("set_metadata", &DiscordLobbyTransaction::set_metadata);
+        register_method("delete_metadata", &DiscordLobbyTransaction::delete_metadata);
+        register_method("set_locked", &DiscordLobbyTransaction::set_locked);
+    }
 
     void _init()
     {
+    }
+};
+
+class DiscordLobby : public discord_to_godot_t<DiscordLobby, discord::Lobby>
+{
+    GODOT_CLASS(DiscordLobby, Reference)
+
+public:
+    auto get_id()
+    {
+        return call(&discord_type::GetId);
+    }
+
+    auto get_type()
+    {
+        return static_cast<int>(call(&discord_type::GetType));
+    }
+
+    auto get_owner_id()
+    {
+        return call(&discord_type::GetOwnerId);
+    }
+
+    auto get_secret()
+    {
+        const char* secret = call(&discord_type::GetSecret);
+        String res{secret};
+        return res;
+    }
+
+    auto get_capacity()
+    {
+        return call(&discord_type::GetCapacity);
+    }
+
+    auto get_locked()
+    {
+        return call(&discord_type::GetLocked);
+    }
+
+    static void _register_methods()
+    {
+        register_method("get_id", &DiscordLobby::get_id);
+        register_method("get_type", &DiscordLobby::get_type);
+        register_method("get_owner_id", &DiscordLobby::get_owner_id);
+        register_method("get_secret", &DiscordLobby::get_secret);
+        register_method("get_capacity", &DiscordLobby::get_capacity);
+        register_method("get_locked", &DiscordLobby::get_locked);
+    }
+};
+
+/*
+    Result GetLobbyActivitySecret(LobbyId lobbyId, char secret[128]);
+    Result GetLobbyMetadataValue(LobbyId lobbyId, MetadataKey key, char value[4096]);
+    Result GetLobbyMetadataKey(LobbyId lobbyId, std::int32_t index, char key[256]);
+    Result LobbyMetadataCount(LobbyId lobbyId, std::int32_t* count);
+    Result MemberCount(LobbyId lobbyId, std::int32_t* count);
+    Result GetMemberUserId(LobbyId lobbyId, std::int32_t index, UserId* userId);
+    Result GetMemberUser(LobbyId lobbyId, UserId userId, User* user);
+    Result GetMemberMetadataValue(LobbyId lobbyId,
+                                  UserId userId,
+                                  MetadataKey key,
+                                  char value[4096]);
+    Result GetMemberMetadataKey(LobbyId lobbyId, UserId userId, std::int32_t index, char key[256]);
+    Result MemberMetadataCount(LobbyId lobbyId, UserId userId, std::int32_t* count);
+    void UpdateMember(LobbyId lobbyId,
+                      UserId userId,
+                      LobbyMemberTransaction const& transaction,
+                      std::function<void(Result)> callback);
+    void SendLobbyMessage(LobbyId lobbyId,
+                          std::uint8_t* data,
+                          std::uint32_t dataLength,
+                          std::function<void(Result)> callback);
+    Result GetSearchQuery(LobbySearchQuery* query);
+    void Search(LobbySearchQuery const& query, std::function<void(Result)> callback);
+    void LobbyCount(std::int32_t* count);
+    Result GetLobbyId(std::int32_t index, LobbyId* lobbyId);
+    void ConnectVoice(LobbyId lobbyId, std::function<void(Result)> callback);
+    void DisconnectVoice(LobbyId lobbyId, std::function<void(Result)> callback);
+    Result ConnectNetwork(LobbyId lobbyId);
+    Result DisconnectNetwork(LobbyId lobbyId);
+    Result FlushNetwork();
+    Result OpenNetworkChannel(LobbyId lobbyId, std::uint8_t channelId, bool reliable);
+    Result SendNetworkMessage(LobbyId lobbyId,
+                              UserId userId,
+                              std::uint8_t channelId,
+                              std::uint8_t* data,
+                              std::uint32_t dataLength);
+
+    Event<std::int64_t> OnLobbyUpdate;
+    Event<std::int64_t, std::uint32_t> OnLobbyDelete;
+    Event<std::int64_t, std::int64_t> OnMemberConnect;
+    Event<std::int64_t, std::int64_t> OnMemberUpdate;
+    Event<std::int64_t, std::int64_t> OnMemberDisconnect;
+    Event<std::int64_t, std::int64_t, std::uint8_t*, std::uint32_t> OnLobbyMessage;
+    Event<std::int64_t, std::int64_t, bool> OnSpeaking;
+    Event<std::int64_t, std::int64_t, std::uint8_t, std::uint8_t*, std::uint32_t> OnNetworkMessage;
+*/
+class DiscordLobbyManager : public discord_to_godot_t<DiscordLobbyManager, discord::LobbyManager>
+{
+    GODOT_CLASS(DiscordLobbyManager, Reference)
+
+public:
+    auto get_lobby_create_transaction(Ref<DiscordLobbyTransaction> transaction)
+    {
+        return call(&discord_type::GetLobbyCreateTransaction, &transaction->data());
+    }
+
+    auto get_lobby_update_transaction(std::int64_t lobby_id, Ref<DiscordLobbyTransaction> transaction)
+    {
+       return call(&discord_type::GetLobbyUpdateTransaction, lobby_id, &transaction->data());
+    }
+
+    auto get_member_update_transaction(std::int64_t lobby_id, std::int64_t user_id, Ref<DiscordLobbyTransaction> transaction)
+    {
+       //return call(&discord_type::GetMemberUpdateTransaction, lobby_id, user_id, &transaction->data()); need to implement membertransaction
+    }
+
+    auto create_lobby(Ref<DiscordLobbyTransaction> transaction)
+    {
+        result_callback callback;
+
+        if(data_)
+        {
+            data_->CreateLobby(transaction->data(), [callback](auto res, auto const& lobby) mutable
+            {
+                callback.data->result_ = static_cast<int>(res);
+                callback.data->data_ =  DiscordLobby::bind(const_cast<discord::Lobby&>(lobby));
+                callback.data->emit_signal("result", callback.data);
+            });
+        }
+
+        return callback.data;
+    }
+
+    auto update_lobby(std::int64_t lobby_id, Ref<DiscordLobbyTransaction> transaction)
+    {
+        return callback(&discord_type::UpdateLobby, lobby_id, transaction->data());
+    }
+
+    auto delete_lobby(std::int64_t lobby_id)
+    {
+        return callback(&discord_type::DeleteLobby, lobby_id);
+    }
+
+    auto connect_lobby(std::int64_t lobby_id, String lobby_secret)
+    {
+        return callback(&discord_type::ConnectLobby, lobby_id, lobby_secret.utf8().get_data());
+    }
+
+    auto disconnect_lobby(std::int64_t lobby_id)
+    {
+        return callback(&discord_type::DisconnectLobby, lobby_id);
+    }
+
+    auto get_lobby(std::int64_t lobby_id, Ref<DiscordLobby> lobby)
+    {
+        return call(&discord_type::GetLobby, lobby_id, lobby->data());
+    }
+
+    static void _register_methods()
+    {
+        register_method("get_lobby_create_transaction", &DiscordLobbyManager::get_lobby_create_transaction);
+        register_method("get_lobby_update_transaction", &DiscordLobbyManager::get_lobby_update_transaction);
+        register_method("get_member_update_transaction", &DiscordLobbyManager::get_member_update_transaction);
+        register_method("create_lobby", &DiscordLobbyManager::create_lobby);
+        register_method("update_lobby", &DiscordLobbyManager::update_lobby);
+        register_method("delete_lobby", &DiscordLobbyManager::delete_lobby);
+        register_method("connect_lobby", &DiscordLobbyManager::connect_lobby);
+        register_method("disconnect_lobby", &DiscordLobbyManager::disconnect_lobby);
+        register_method("get_lobby", &DiscordLobbyManager::get_lobby);
     }
 };
 
@@ -365,55 +550,61 @@ class DiscordCore : public Reference
 {
     GODOT_CLASS(DiscordCore, Reference)
 
-    std::unique_ptr<discord::Core> core_;
+    std::unique_ptr<discord::Core> data_;
 
 public:
+    void create(std::int64_t application_id)
+    {
+        discord::Core* core{};
+        discord::Result res = discord::Core::Create(application_id, DiscordCreateFlags_Default, &core);
+        data_.reset(core);
+    }
+
+    void run_callbacks()
+    {
+        if(data_)
+        {
+            data_->RunCallbacks();
+        }
+    }
+
+    template<typename manager_type, typename get_manager_op>
+    auto get_manager(get_manager_op op)
+    {
+        if(data_)
+        {
+            return manager_type::bind(std::invoke(op, data_));
+        }
+
+        return Ref<manager_type>{};
+    }
+
+    auto get_activity_manager()
+    {
+        return get_manager<DiscordActivityManager>(&discord::Core::ActivityManager);
+    }
+
+    auto get_overlay_mangager()
+    {
+        return get_manager<DiscordOverlayManager>(&discord::Core::OverlayManager);
+    }
+
+    auto get_lobby_mangager()
+    {
+        return get_manager<DiscordLobbyManager>(&discord::Core::LobbyManager);
+    }
+
     static void _register_methods()
     {
         register_method("create", &DiscordCore::create);
         register_method("run_callbacks", &DiscordCore::run_callbacks);
         register_method("get_activity_manager", &DiscordCore::get_activity_manager);
         register_method("get_overlay_manager", &DiscordCore::get_overlay_mangager);
+        register_method("get_lobby_manager", &DiscordCore::get_lobby_mangager);
     }
 
     void _init()
     {
-    }
-
-    void create(std::int64_t application_id)
-    {
-        discord::Core* core{};
-        discord::Result res = discord::Core::Create(application_id, DiscordCreateFlags_Default, &core);
-        core_.reset(core);
-    }
-
-    void run_callbacks()
-    {
-        if(core_)
-        {
-            core_->RunCallbacks();
-        }
-    }
-
-    Ref<DiscordActivityManager> get_activity_manager()
-    {
-        if(core_)
-        {
-            return DiscordActivityManager::make(core_->ActivityManager());
-        }
-
-        return {};
-    }
-
-
-    Ref<DiscordOverlayManager> get_overlay_mangager()
-    {
-        if(core_)
-        {
-            return DiscordOverlayManager::make(core_->OverlayManager());
-        }
-
-        return {};
     }
 };
 
@@ -436,6 +627,9 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
     godot::register_class<godot::DiscordActivity>();
     godot::register_class<godot::DiscordActivityManager>();
     godot::register_class<godot::DiscordOverlayManager>();
+    godot::register_class<godot::DiscordLobbyTransaction>();
+    godot::register_class<godot::DiscordLobby>();
+    godot::register_class<godot::DiscordLobbyManager>();
     godot::register_class<godot::DiscordCore>();
 }
 }
