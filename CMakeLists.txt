@@ -69,13 +69,13 @@ if(APPLE)
 
   find_library(
     DISCORD_SDK 
-    NAMES discord_game_sdk
+    NAMES discord_game_sdk.dylib
     REQUIRED 
     PATHS ${DISCORD_SDK_PATH}/lib/x86_64)
 else()
   find_library(
     DISCORD_SDK 
-    NAMES libdiscord_game_sdk.so
+    NAMES libdiscord_game_sdk.so discord_game_sdk.dll
     REQUIRED 
     PATHS ${DISCORD_SDK_PATH}/lib/x86_64)
 endif()
