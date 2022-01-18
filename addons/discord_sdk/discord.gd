@@ -85,6 +85,7 @@ class Activity:
 var discore_core_:DiscordCore
 var activity_manager
 var lobby_manager
+var overlay_manager
 
 func _ready():
 	if OS.has_feature("standalone"):
@@ -98,6 +99,7 @@ func _ready():
 		
 		activity_manager = discore_core_.get_activity_manager()
 		lobby_manager = discore_core_.get_lobby_manager()
+		overlay_manager = discore_core_.get_overlay_manager()
 	
 func _process(delta:float) -> void:
 	if discore_core_:

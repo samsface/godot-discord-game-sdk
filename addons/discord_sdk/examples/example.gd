@@ -44,22 +44,21 @@ func lobby_message_(lobby_id, user_id, message) -> void:
 	find_node("text").text += message + "\n"
 
 func _on_create_lobby_pressed() -> void:
-	var lobby_manager = Discord.get_lobby_manager()
 	var transaction = DiscordLobbyTransaction.new()
-	lobby_manager.get_lobby_create_transaction(transaction)
+	Discord.lobby_manager.get_lobby_create_transaction(transaction)
 	
 	transaction.set_capacity(6)
 	transaction.set_type(Discord.LobbyType.Private)
 	transaction.set_locked(false)
 	transaction.set_metadata("a", "123");
 
-	var create_lobby_res = yield(lobby_manager.create_lobby(transaction), "result")
+	var create_lobby_res = yield(Discord.lobby_manager.create_lobby(transaction), "result")
 	if create_lobby_res.result == Discord.Result.Ok:
 		var lobby = create_lobby_res.data
 		lobby_id_ = lobby.get_id()
 		secret_ = lobby.get_secret()
 		find_node("lobby_id").text = str(lobby_id_)
-		
+
 		var activity = DiscordActivity.new()
 		#activity.set_application_id(932734837922611310)
 		activity.set_type(Discord.ActivityType.Playing)
@@ -82,23 +81,16 @@ func _on_create_lobby_pressed() -> void:
 		party.get_size().set_current_size(1)
 		party.get_size().set_max_size(6)
 
-		var activity_manager = Discord.get_activity_manager()
-		if activity_manager:
-			#var res = activity_manager.register_steam(1543290)
-			var res = activity_manager.register_command("/media/sam/adffc9be-fe94-4c6b-87db-cca9cb566739/work/godot-discord/app/export/game.x86_64")
-			var clear = yield(activity_manager.clear_activity(), "result").result
-			#var res = activity_manager.register_command("echo sam")
+		if Discord.activity_manager:
+			var res = Discord.activity_manager.register_command("/media/sam/adffc9be-fe94-4c6b-87db-cca9cb566739/work/godot-discord/app/export/game.x86_64")
+			var clear = yield(Discord.activity_manager.clear_activity(), "result").result
 
-			var res2 = yield(activity_manager.update_activity(activity), "result")
+			var res2 = yield(Discord.activity_manager.update_activity(activity), "result")
 			prints("res2", res2)
 
 func _on_invite_pressed() -> void:
-	var overlay_manager = Discord.get_overlay_manager()
-	print(overlay_manager.is_enabled())
-	
-	var res4 = yield(overlay_manager.open_activity_invite(Discord.ActivityActionType.Join), "result")
+	var res4 = yield(Discord.overlay_manager.open_activity_invite(Discord.ActivityActionType.Join), "result")
 	print(res4)
-
 
 func _on_chat_text_entered(new_text:String):
 	if lobby_id_:
