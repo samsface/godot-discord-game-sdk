@@ -83,20 +83,28 @@ class Activity:
 		data_.set_details(value)
 
 var discore_core_:DiscordCore
+var activity_manager
+var lobby_manager
 
 func _ready():
+	if OS.has_feature("standalone"):
+		OS.set_environment("DISCORD_INSTANCE_ID", "1")
+	else:
+		OS.set_environment("DISCORD_INSTANCE_ID", "0")
+	
 	discore_core_ = DiscordCore.new()
 	if discore_core_:
-		discore_core_.create(931968567249879101)
+		discore_core_.create(932734837922611310)
+		
+		activity_manager = discore_core_.get_activity_manager()
+		lobby_manager = discore_core_.get_lobby_manager()
 	
 func _process(delta:float) -> void:
 	if discore_core_:
 		discore_core_.run_callbacks()
 
 func get_activity_manager() -> DiscordActivityManager:
-	if discore_core_:
-		return discore_core_.get_activity_manager()
-	return null
+	return activity_manager
 	
 func get_overlay_manager() -> DiscordOverlayManager:
 	if discore_core_:
@@ -104,6 +112,4 @@ func get_overlay_manager() -> DiscordOverlayManager:
 	return null
 
 func get_lobby_manager() -> DiscordLobbyManager:
-	if discore_core_:
-		return discore_core_.get_lobby_manager()
-	return null
+	return lobby_manager

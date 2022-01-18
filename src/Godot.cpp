@@ -110,11 +110,16 @@ public:
     {
         Ref<godot_type> res{godot_type::_new()};
         res->data_ = &type;
+        res->init();
 
         return res;
     }
 
     void _init()
+    {
+    }
+
+    void init()
     {
     }
 };
@@ -185,6 +190,50 @@ public:
     }
 };
 
+class DiscordPartySize : public discord_to_godot_t<DiscordPartySize, discord::PartySize>
+{
+    GODOT_CLASS(DiscordPartySize, Reference)
+
+public:
+    void set_current_size(int value)
+    {
+        call(&discord_type::SetCurrentSize, value);
+    }
+
+    auto set_max_size(int value)
+    {
+        return call(&discord_type::SetMaxSize, value);
+    }
+
+    static void _register_methods()
+    {
+        register_method("set_current_size", &DiscordPartySize::set_current_size);
+        register_method("set_max_size", &DiscordPartySize::set_max_size);
+    }
+};
+
+class DiscordActivityParty : public discord_to_godot_t<DiscordActivityParty, discord::ActivityParty>
+{
+    GODOT_CLASS(DiscordActivityParty, Reference)
+
+public:
+    void set_id(String value)
+    {
+        call(&discord_type::SetId, value.utf8().get_data());
+    }
+
+    auto get_size()
+    {
+        return DiscordPartySize::bind(data_->GetSize()); // what if is null?
+    }
+
+    static void _register_methods()
+    {
+        register_method("set_id", &DiscordActivityParty::set_id);
+        register_method("get_size", &DiscordActivityParty::get_size);
+    }
+};
+
 class DiscordActivity : public Reference
 {
     GODOT_CLASS(DiscordActivity, Reference)
@@ -237,6 +286,11 @@ public:
         return DiscordActivitySecrets::bind(data_.GetSecrets());
     }
 
+    auto get_party()
+    {
+        return DiscordActivityParty::bind(data_.GetParty());
+    }
+
     static void _register_methods()
     {
         register_method("set_type", &DiscordActivity::set_type);
@@ -247,6 +301,7 @@ public:
         register_method("set_instance", &DiscordActivity::set_instance);
         register_method("get_assets", &DiscordActivity::get_assets);
         register_method("get_secrets", &DiscordActivity::get_secrets);
+        register_method("get_party", &DiscordActivity::get_party);
     }
 
     void _init()
@@ -276,7 +331,7 @@ public:
 
     auto clear_activity()
     {
-        return callback(&discord_type::ClearActivity);
+        return callback(&discord_type::ClearActivity);  
     }
 
     static void _register_methods()
@@ -285,6 +340,27 @@ public:
         register_method("register_steam", &DiscordActivityManager::register_steam);
         register_method("update_activity", &DiscordActivityManager::update_activity);
         register_method("clear_activity", &DiscordActivityManager::clear_activity);
+        register_signal<DiscordActivityManager>("activity_join", "secret", GODOT_VARIANT_TYPE_OBJECT);
+        register_signal<DiscordActivityManager>("activity_invite");
+        register_signal<DiscordActivityManager>("activity_join_request");
+    }
+
+    void init()
+    {
+        data_->OnActivityJoin.Connect([&](char const* secret)
+        {
+            emit_signal("activity_join", String(secret));
+        });
+
+        data_->OnActivityInvite.Connect([&](auto activation_type, auto const& user, auto const& activity)
+        {
+           emit_signal("activity_invite");
+        });
+
+        data_->OnActivityJoinRequest.Connect([&](auto)
+        {
+           emit_signal("activity_join_request");
+        });
     }
 };
 
@@ -397,9 +473,7 @@ public:
 
     auto get_secret()
     {
-        const char* secret = call(&discord_type::GetSecret);
-        String res{secret};
-        return res;
+        return String(call(&discord_type::GetSecret));
     }
 
     auto get_capacity()
@@ -441,10 +515,7 @@ public:
                       UserId userId,
                       LobbyMemberTransaction const& transaction,
                       std::function<void(Result)> callback);
-    void SendLobbyMessage(LobbyId lobbyId,
-                          std::uint8_t* data,
-                          std::uint32_t dataLength,
-                          std::function<void(Result)> callback);
+
     Result GetSearchQuery(LobbySearchQuery* query);
     void Search(LobbySearchQuery const& query, std::function<void(Result)> callback);
     void LobbyCount(std::int32_t* count);
@@ -519,7 +590,25 @@ public:
 
     auto connect_lobby(std::int64_t lobby_id, String lobby_secret)
     {
+        std::cout << lobby_id << std::endl;
         return callback(&discord_type::ConnectLobby, lobby_id, lobby_secret.utf8().get_data());
+    }
+
+    auto connect_lobby_with_activity_secret(String activitySecret)
+    {
+        result_callback callback;
+
+        if(data_)
+        {
+            data_->ConnectLobbyWithActivitySecret(activitySecret.utf8().get_data(), [callback](auto res, auto const& lobby) mutable
+            {
+                callback.data->result_ = static_cast<int>(res);
+                callback.data->data_ =  DiscordLobby::bind(const_cast<discord::Lobby&>(lobby));
+                callback.data->emit_signal("result", callback.data);
+            });
+        }
+
+        return callback.data;
     }
 
     auto disconnect_lobby(std::int64_t lobby_id)
@@ -530,6 +619,18 @@ public:
     auto get_lobby(std::int64_t lobby_id, Ref<DiscordLobby> lobby)
     {
         return call(&discord_type::GetLobby, lobby_id, lobby->data());
+    }
+
+    auto send_lobby_message(std::int64_t lobby_id, PoolByteArray bytes)
+    {
+        return callback(&discord_type::SendLobbyMessage, lobby_id, bytes.write().ptr(), bytes.size());
+    }
+
+    auto get_lobby_activity_secret(std::int64_t lobby_id)
+    {
+        std::array<char, 129> buffer{};
+        call(&discord_type::GetLobbyActivitySecret, lobby_id, buffer.data());
+        return String(buffer.data());
     }
 
     static void _register_methods()
@@ -543,6 +644,19 @@ public:
         register_method("connect_lobby", &DiscordLobbyManager::connect_lobby);
         register_method("disconnect_lobby", &DiscordLobbyManager::disconnect_lobby);
         register_method("get_lobby", &DiscordLobbyManager::get_lobby);
+        register_method("send_lobby_message", &DiscordLobbyManager::send_lobby_message);
+        register_method("get_lobby_activity_secret", &DiscordLobbyManager::get_lobby_activity_secret);
+        register_method("connect_lobby_with_activity_secret", &DiscordLobbyManager::connect_lobby_with_activity_secret);
+        register_signal<DiscordLobbyManager>("lobby_message", "lobby_id", GODOT_VARIANT_TYPE_OBJECT, "user_id", GODOT_VARIANT_TYPE_OBJECT, "message", GODOT_VARIANT_TYPE_OBJECT);
+    }
+
+    void init()
+    {
+        data_->OnLobbyMessage.Connect([&](auto lobby_id, auto user_id, std::uint8_t* buffer, std::uint32_t buffer_size)
+        {
+            String message{std::string(reinterpret_cast<const char*>(buffer), buffer_size).data()};
+            emit_signal("lobby_message", lobby_id, user_id, message);
+        });
     }
 };
 
@@ -558,6 +672,11 @@ public:
         discord::Core* core{};
         discord::Result res = discord::Core::Create(application_id, DiscordCreateFlags_Default, &core);
         data_.reset(core);
+
+        data_->SetLogHook(discord::LogLevel::Info, [&](auto level, char const* message)
+        {
+            emit_signal("log", String(message));
+        });
     }
 
     void run_callbacks()
@@ -601,6 +720,7 @@ public:
         register_method("get_activity_manager", &DiscordCore::get_activity_manager);
         register_method("get_overlay_manager", &DiscordCore::get_overlay_mangager);
         register_method("get_lobby_manager", &DiscordCore::get_lobby_mangager);
+        register_signal<DiscordCore>("log", "message", GODOT_VARIANT_TYPE_OBJECT);
     }
 
     void _init()
@@ -623,6 +743,8 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
     godot::Godot::nativescript_init(handle);
     godot::register_class<godot::DiscordResult>();
     godot::register_class<godot::DiscordActivityAssets>();
+    godot::register_class<godot::DiscordPartySize>();
+    godot::register_class<godot::DiscordActivityParty>();
     godot::register_class<godot::DiscordActivitySecrets>();
     godot::register_class<godot::DiscordActivity>();
     godot::register_class<godot::DiscordActivityManager>();

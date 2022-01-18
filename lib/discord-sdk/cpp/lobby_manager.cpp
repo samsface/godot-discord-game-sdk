@@ -272,7 +272,7 @@ Result LobbyManager::GetLobby(LobbyId lobbyId, Lobby* lobby)
     return static_cast<Result>(result);
 }
 
-Result LobbyManager::GetLobbyActivitySecret(LobbyId lobbyId, char secret[128])
+Result LobbyManager::GetLobbyActivitySecret(LobbyId lobbyId, char* secret)
 {
     if (!secret) {
         return Result::InternalError;

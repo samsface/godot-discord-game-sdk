@@ -25,6 +25,11 @@ _global_script_classes=[ {
 "path": "res://addons/discord_sdk/discord_activity_manager.gdns"
 }, {
 "base": "Reference",
+"class": "DiscordActivityParty",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_activity_party.gdns"
+}, {
+"base": "Reference",
 "class": "DiscordActivitySecrets",
 "language": "NativeScript",
 "path": "res://addons/discord_sdk/discord_activity_secrets.gdns"
@@ -55,6 +60,11 @@ _global_script_classes=[ {
 "path": "res://addons/discord_sdk/discord_overlay_manager.gdns"
 }, {
 "base": "Reference",
+"class": "DiscordPartySize",
+"language": "NativeScript",
+"path": "res://addons/discord_sdk/discord_party_size.gdns"
+}, {
+"base": "Reference",
 "class": "DiscordResult",
 "language": "NativeScript",
 "path": "res://addons/discord_sdk/discord_result.gdns"
@@ -63,12 +73,14 @@ _global_script_class_icons={
 "DiscordActivity": "",
 "DiscordActivityAssets": "",
 "DiscordActivityManager": "",
+"DiscordActivityParty": "",
 "DiscordActivitySecrets": "",
 "DiscordCore": "",
 "DiscordLobby": "",
 "DiscordLobbyManager": "",
 "DiscordLobbyTransaction": "",
 "DiscordOverlayManager": "",
+"DiscordPartySize": "",
 "DiscordResult": ""
 }
 

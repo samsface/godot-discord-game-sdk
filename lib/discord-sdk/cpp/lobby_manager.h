@@ -26,7 +26,7 @@ public:
                                         std::function<void(Result, Lobby const&)> callback);
     void DisconnectLobby(LobbyId lobbyId, std::function<void(Result)> callback);
     Result GetLobby(LobbyId lobbyId, Lobby* lobby);
-    Result GetLobbyActivitySecret(LobbyId lobbyId, char secret[128]);
+    Result GetLobbyActivitySecret(LobbyId lobbyId, char* secret);
     Result GetLobbyMetadataValue(LobbyId lobbyId, MetadataKey key, char value[4096]);
     Result GetLobbyMetadataKey(LobbyId lobbyId, std::int32_t index, char key[256]);
     Result LobbyMetadataCount(LobbyId lobbyId, std::int32_t* count);
