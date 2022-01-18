@@ -590,7 +590,6 @@ public:
 
     auto connect_lobby(std::int64_t lobby_id, String lobby_secret)
     {
-        std::cout << lobby_id << std::endl;
         return callback(&discord_type::ConnectLobby, lobby_id, lobby_secret.utf8().get_data());
     }
 
