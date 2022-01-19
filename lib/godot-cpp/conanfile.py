@@ -38,8 +38,8 @@ class GodotCppConan(ConanFile):
     def _configure_cmake(self):
         cmake = CMake(self)
 
-        if self.settings.os == "Macos":
-            cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "arm64;x86_64"
+        #if self.settings.os == "Macos":
+        #    cmake.definitions["CMAKE_OSX_ARCHITECTURES"] = "arm64;x86_64"
 
         cmake.configure()
         return cmake

@@ -62,10 +62,10 @@ target_include_directories(
   ${DISCORD_SDK_PATH}/cpp)
 
 if(APPLE)
-  set_target_properties(
-    discord-sdk-godot
-    PROPERTIES 
-    OSX_ARCHITECTURES "arm64;x86_64")
+  #set_target_properties(
+  #  discord-sdk-godot
+  #  PROPERTIES 
+  #  OSX_ARCHITECTURES "arm64;x86_64")
 
   find_library(
     DISCORD_SDK 
