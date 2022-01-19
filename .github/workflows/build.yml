@@ -43,35 +43,16 @@ jobs:
       - name: build
         run: sh ci/package.bash work/artifacts
         shell: bash
-      - name: upload-artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: project
-          path: addons
-
-  #publish:
-  #  needs: [package]
-  #  runs-on: ubuntu-latest
-  #  steps:
-  #    - name: checkout
-  #      uses: actions/checkout@v2
-  #      with:
-  #        ref: master
-  #    - name: download all build artifacts
-  #      uses: actions/download-artifact@v2
-  #      with:
-  #        name: project
-  #        path: addons
-  #    - name: commit
-  #      run: |
-  #        git config --global user.name 'samsface'
-  #        git config --global user.email 'samsface@users.noreply.github.com'
-  #        git add -A
-  #        git commit -am "automated commit"
-  #        git push
+      - name: commit
+        run: |
+          git config --global user.name 'samsface'
+          git config --global user.email 'samsface@users.noreply.github.com'
+          git add -A
+          git commit -am "automated commit"
+          git push
 
   remove-old-artifacts:
-    needs: [build]
+    needs: [package]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
