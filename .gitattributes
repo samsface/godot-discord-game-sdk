@@ -16,8 +16,8 @@
 /lib                export-ignore
 /ci                 export-ignore
 /icon.png           export-ignore
-/addons/discord-sdk/libdiscord_game_sdk.so
-/addons/discord-sdk/discord_game_sdk.so
-/addons/discord-sdk/discord_game_sdk.dll
-/addons/discord-sdk/libdiscord_game_sdk.dylib
-/addons/discord-sdk/discord_game_sdk.dylib
+/addons/discord_sdk/libdiscord_game_sdk.so
+/addons/discord_sdk/discord_game_sdk.so
+/addons/discord_sdk/discord_game_sdk.dll
+/addons/discord_sdk/libdiscord_game_sdk.dylib
+/addons/discord_sdk/discord_game_sdk.dylib
