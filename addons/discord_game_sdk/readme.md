@@ -44,7 +44,6 @@ func create_lobby():
 		push_error(result.result)
 		return
 
-	var lobby = result.data
-	var secret = lobby.get_secret()
-  print(secret)
+	var lobby = result.data	
+	Discord.lobby_manager.send_message(lobby.get_id(), "hello people!")
 ```
