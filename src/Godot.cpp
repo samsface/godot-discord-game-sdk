@@ -5,6 +5,7 @@
 #include <memory>
 #include <set>
 #include <array>
+#include <string>
 
 namespace godot 
 {
