@@ -1,1 +1,1 @@
-addons/steam_api/readme.md
+addons/discord_game_sdk/readme.md
