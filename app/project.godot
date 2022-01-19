@@ -12,7 +12,7 @@ _global_script_classes=[ {
 "base": "Resource",
 "class": "ChatMessage",
 "language": "GDScript",
-"path": "res://chat_message.gd"
+"path": "res://addons/discord_game_sdk/example/chat_message.gd"
 }, {
 "base": "Reference",
 "class": "DiscordActivity",
@@ -82,12 +82,12 @@ _global_script_classes=[ {
 "base": "Resource",
 "class": "GameState",
 "language": "GDScript",
-"path": "res://game_state.gd"
+"path": "res://addons/discord_game_sdk/example/game_state.gd"
 }, {
 "base": "Resource",
 "class": "Member",
 "language": "GDScript",
-"path": "res://member.gd"
+"path": "res://addons/discord_game_sdk/example/member.gd"
 } ]
 _global_script_class_icons={
 "ChatMessage": "",
@@ -111,7 +111,7 @@ _global_script_class_icons={
 [application]
 
 config/name="Discord Game SDK"
-run/main_scene="res://lobby.tscn"
+run/main_scene="res://addons/discord_game_sdk/example/lobby.tscn"
 config/icon="res://icon.png"
 
 [autoload]
