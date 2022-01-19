@@ -10,11 +10,9 @@ reloadable=true
 OSX.64="res://addons/discord_game_sdk/libdiscord-game-sdk-godot.dylib"
 Windows.64="res://addons/discord_game_sdk/discord-game-sdk-godot.dll"
 X11.64="res://addons/discord_game_sdk/libdiscord-game-sdk-godot.so"
-Server="res://addons/discord_game_sdk/libdiscord-game-sdk-godot.so"
 
 [dependencies]
 
 OSX.64=[ "res://addons/discord_game_sdk/libdiscord_game_sdk.dylib" ]
 Windows.64=[ "res://addons/discord_game_sdk/discord_game_sdk.dll" ]
 X11.64=[ "res://addons/discord_game_sdk/libdiscord_game_sdk.so" ]
-Server=[ "res://addons/discord_game_sdk/libdiscord_game_sdk.so" ]
