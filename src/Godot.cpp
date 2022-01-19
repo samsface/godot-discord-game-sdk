@@ -4,6 +4,7 @@
 #include <discord.h>
 #include <memory>
 #include <set>
+#include <array>
 
 namespace godot 
 {
@@ -675,9 +676,9 @@ public:
 
     auto get_lobby_activity_secret(std::int64_t lobby_id)
     {
-        std::array<char, 129> buffer{};
-        call(&discord_type::GetLobbyActivitySecret, lobby_id, buffer.data());
-        return String(buffer.data());
+        //std::array<char, 129> buffer{};
+        //call(&discord_type::GetLobbyActivitySecret, lobby_id, buffer.data());
+        //return String(buffer.data());
     }
 
     auto get_member_count(std::int64_t lobby_id)
