@@ -120,10 +120,10 @@ Discord="*res://addons/discord_sdk/discord.gd"
 
 [display]
 
-window/size/width=160
-window/size/height=144
+window/size/width=640
+window/size/height=480
 window/size/test_width=640
-window/size/test_height=576
+window/size/test_height=480
 window/stretch/mode="2d"
 window/stretch/aspect="keep_height"
 
