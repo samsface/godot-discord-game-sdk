@@ -1,0 +1,58 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://lobby.gd" type="Script" id=1]
+[ext_resource path="res://game.gd" type="Script" id=2]
+
+[node name="game" type="Control"]
+margin_right = 40.0
+margin_bottom = 40.0
+script = ExtResource( 2 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="create_game" type="Button" parent="."]
+margin_left = 1.0
+margin_top = 10.0
+margin_right = 94.0
+margin_bottom = 30.0
+text = "create_game"
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="chat" type="TextEdit" parent="."]
+margin_top = 80.0
+margin_right = 160.0
+margin_bottom = 120.0
+readonly = true
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="line_edit" type="LineEdit" parent="."]
+margin_top = 120.0
+margin_right = 160.0
+margin_bottom = 144.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="lobby" type="Control" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[node name="members" type="Label" parent="."]
+margin_left = 98.0
+margin_right = 160.0
+margin_bottom = 80.0
+__meta__ = {
+"_edit_use_anchors_": false
+}
+
+[connection signal="pressed" from="create_game" to="lobby" method="_on_create_game_pressed"]
+[connection signal="text_entered" from="line_edit" to="." method="_on_text_entered"]

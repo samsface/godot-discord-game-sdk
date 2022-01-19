@@ -55,7 +55,12 @@ protected:
 
 public:
 
-    auto const& data()
+    auto const& data() const
+    {
+        return data_;
+    }
+
+    auto& data()
     {
         return data_;
     }
@@ -120,6 +125,53 @@ public:
     }
 
     void init()
+    {
+    }
+};
+
+class DiscordUser : public Reference
+{
+    /*
+      void SetId(UserId id);
+    UserId GetId() const;
+    void SetUsername(char const* username);
+    char const* GetUsername() const;
+    void SetDiscriminator(char const* discriminator);
+    char const* GetDiscriminator() const;
+    void SetAvatar(char const* avatar);
+    char const* GetAvatar() const;
+    void SetBot(bool bot);
+    bool GetBot() const;
+    */
+    GODOT_CLASS(DiscordUser, Reference)
+
+
+
+public:
+    discord::User data_;
+
+    auto& data()
+    {
+        return data_;
+    }
+
+    auto get_id()
+    {
+        return data_.GetId();
+    }
+
+    auto get_username()
+    {
+        return String(data_.GetUsername());
+    }
+
+    static void _register_methods()
+    {
+        register_method("get_username", &DiscordUser::get_username);
+        register_method("get_id", &DiscordUser::get_id);
+    }
+
+    void _init()
     {
     }
 };
@@ -398,9 +450,9 @@ class DiscordLobbyTransaction : public Reference
 {
     GODOT_CLASS(DiscordLobbyTransaction, Reference)
 
+public:
     discord::LobbyTransaction data_;
 
-public:
     auto& data()
     {
         return data_;
@@ -502,8 +554,8 @@ public:
     Result GetLobbyMetadataValue(LobbyId lobbyId, MetadataKey key, char value[4096]);
     Result GetLobbyMetadataKey(LobbyId lobbyId, std::int32_t index, char key[256]);
     Result LobbyMetadataCount(LobbyId lobbyId, std::int32_t* count);
-    Result MemberCount(LobbyId lobbyId, std::int32_t* count);
-    Result GetMemberUserId(LobbyId lobbyId, std::int32_t index, UserId* userId);
+  
+
     Result GetMemberUser(LobbyId lobbyId, UserId userId, User* user);
     Result GetMemberMetadataValue(LobbyId lobbyId,
                                   UserId userId,
@@ -533,11 +585,7 @@ public:
                               std::uint32_t dataLength);
 
     Event<std::int64_t> OnLobbyUpdate;
-    Event<std::int64_t, std::uint32_t> OnLobbyDelete;
-    Event<std::int64_t, std::int64_t> OnMemberConnect;
     Event<std::int64_t, std::int64_t> OnMemberUpdate;
-    Event<std::int64_t, std::int64_t> OnMemberDisconnect;
-    Event<std::int64_t, std::int64_t, std::uint8_t*, std::uint32_t> OnLobbyMessage;
     Event<std::int64_t, std::int64_t, bool> OnSpeaking;
     Event<std::int64_t, std::int64_t, std::uint8_t, std::uint8_t*, std::uint32_t> OnNetworkMessage;
 */
@@ -632,6 +680,25 @@ public:
         return String(buffer.data());
     }
 
+    auto get_member_count(std::int64_t lobby_id)
+    {
+        std::int32_t res{};
+        call(&discord_type::MemberCount, lobby_id, &res);
+        return res;
+    }
+
+    auto get_member_user_id(std::int64_t lobby_id, std::int32_t index)
+    {
+        std::int64_t res{};
+        call(&discord_type::GetMemberUserId, lobby_id, index, &res);
+        return res;
+    }
+
+    auto get_member_user(std::int64_t lobby_id, std::int64_t user_id, Ref<DiscordUser> user)
+    {
+        return call(&discord_type::GetMemberUser, lobby_id, user_id, &user->data_);
+    }
+
     static void _register_methods()
     {
         register_method("get_lobby_create_transaction", &DiscordLobbyManager::get_lobby_create_transaction);
@@ -646,7 +713,14 @@ public:
         register_method("send_lobby_message", &DiscordLobbyManager::send_lobby_message);
         register_method("get_lobby_activity_secret", &DiscordLobbyManager::get_lobby_activity_secret);
         register_method("connect_lobby_with_activity_secret", &DiscordLobbyManager::connect_lobby_with_activity_secret);
+        register_method("get_member_count", &DiscordLobbyManager::get_member_count);
+        register_method("get_member_user_id", &DiscordLobbyManager::get_member_user_id);
+        register_method("get_member_user", &DiscordLobbyManager::get_member_user);
         register_signal<DiscordLobbyManager>("lobby_message", "lobby_id", GODOT_VARIANT_TYPE_OBJECT, "user_id", GODOT_VARIANT_TYPE_OBJECT, "message", GODOT_VARIANT_TYPE_OBJECT);
+        register_signal<DiscordLobbyManager>("member_connect", "lobby_id", GODOT_VARIANT_TYPE_OBJECT, "user_id", GODOT_VARIANT_TYPE_OBJECT);
+        register_signal<DiscordLobbyManager>("member_disconnect", "lobby_id", GODOT_VARIANT_TYPE_OBJECT, "user_id", GODOT_VARIANT_TYPE_OBJECT);
+        register_signal<DiscordLobbyManager>("lobby_delete", "lobby_id", GODOT_VARIANT_TYPE_OBJECT, "reason", GODOT_VARIANT_TYPE_OBJECT);
+        register_signal<DiscordLobbyManager>("lobby_update", "lobby_id", GODOT_VARIANT_TYPE_OBJECT);
     }
 
     void init()
@@ -655,6 +729,26 @@ public:
         {
             String message{std::string(reinterpret_cast<const char*>(buffer), buffer_size).data()};
             emit_signal("lobby_message", lobby_id, user_id, message);
+        });
+
+        data_->OnMemberConnect.Connect([&](auto lobby_id, auto user_id)
+        {
+            emit_signal("member_connect", lobby_id, user_id);
+        });
+
+        data_->OnMemberDisconnect.Connect([&](auto lobby_id, auto user_id)
+        {
+            emit_signal("member_disconnect", lobby_id, user_id);
+        });
+
+        data_->OnLobbyDelete.Connect([&](auto lobby_id, auto reason)
+        {
+            emit_signal("lobby_delete", lobby_id, reason);
+        });
+
+        data_->OnLobbyUpdate.Connect([&](auto lobby_id)
+        {
+            emit_signal("lobby_update", lobby_id);
         });
     }
 };
@@ -741,6 +835,7 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
 {
     godot::Godot::nativescript_init(handle);
     godot::register_class<godot::DiscordResult>();
+    godot::register_class<godot::DiscordUser>();
     godot::register_class<godot::DiscordActivityAssets>();
     godot::register_class<godot::DiscordPartySize>();
     godot::register_class<godot::DiscordActivityParty>();
