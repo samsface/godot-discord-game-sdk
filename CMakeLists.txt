@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-project(steamsdk-godot)
+project(discord-game-sdk-godot)
 
 option(BUILD_SHARED_LIBS "Build shared libs" ON)
 
@@ -38,7 +38,7 @@ find_package(godot-cpp)
 # install build into example project by default
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   set(
-    CMAKE_INSTALL_PREFIX "../app/addons/discord_sdk" 
+    CMAKE_INSTALL_PREFIX "../app/addons/discord_game_sdk" 
     CACHE PATH "..." 
     FORCE)
 endif()
@@ -48,22 +48,22 @@ set(CMAKE_INSTALL_RPATH "$ORIGIN")
 
 file(GLOB_RECURSE DISCORD_SOURCES ${DISCORD_SDK_PATH}/cpp/*.cpp)
 
-add_library(discord-sdk-godot src/Godot.cpp ${DISCORD_SOURCES})
+add_library(discord-game-sdk-godot src/Godot.cpp ${DISCORD_SOURCES})
 
 set_target_properties(
-  discord-sdk-godot
+  discord-game-sdk-godot
   PROPERTIES
   CXX_STANDARD 17
   CXX_STANDARD_REQUIRED ON)
 
 target_include_directories(
-  discord-sdk-godot 
+  discord-game-sdk-godot 
   PUBLIC 
   ${DISCORD_SDK_PATH}/cpp)
 
 if(APPLE)
   #set_target_properties(
-  #  discord-sdk-godot
+  #  discord-game-sdk-godot
   #  PROPERTIES 
   #  OSX_ARCHITECTURES "arm64;x86_64")
 
@@ -81,9 +81,9 @@ else()
 endif()
 
 target_link_libraries(
-  discord-sdk-godot
+  discord-game-sdk-godot
   PRIVATE
     godot-cpp::godot-cpp
     ${DISCORD_SDK})
 
-install(TARGETS discord-sdk-godot DESTINATION .)
+install(TARGETS discord-game-sdk-godot DESTINATION .)

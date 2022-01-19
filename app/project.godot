@@ -14,70 +14,70 @@ _global_script_classes=[ {
 "language": "GDScript",
 "path": "res://chat_message.gd"
 }, {
-"base": "",
+"base": "Reference",
 "class": "DiscordActivity",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_activity.gdns"
+"path": "res://addons/discord_game_sdk/discord_activity.gdns"
 }, {
 "base": "Reference",
 "class": "DiscordActivityAssets",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_activity_assets.gdns"
+"path": "res://addons/discord_game_sdk/discord_activity_assets.gdns"
 }, {
-"base": "",
+"base": "Reference",
 "class": "DiscordActivityManager",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_activity_manager.gdns"
+"path": "res://addons/discord_game_sdk/discord_activity_manager.gdns"
 }, {
 "base": "Reference",
 "class": "DiscordActivityParty",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_activity_party.gdns"
+"path": "res://addons/discord_game_sdk/discord_activity_party.gdns"
 }, {
 "base": "Reference",
 "class": "DiscordActivitySecrets",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_activity_secrets.gdns"
+"path": "res://addons/discord_game_sdk/discord_activity_secrets.gdns"
 }, {
-"base": "",
+"base": "Reference",
 "class": "DiscordCore",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_core.gdns"
+"path": "res://addons/discord_game_sdk/discord_core.gdns"
 }, {
-"base": "Reference",
+"base": "",
 "class": "DiscordLobby",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_lobby.gdns"
+"path": "res://addons/discord_game_sdk/discord_lobby.gdns"
 }, {
-"base": "Reference",
+"base": "",
 "class": "DiscordLobbyManager",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_lobby_manager.gdns"
+"path": "res://addons/discord_game_sdk/discord_lobby_manager.gdns"
 }, {
 "base": "Reference",
 "class": "DiscordLobbyTransaction",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_lobby_transaction.gdns"
+"path": "res://addons/discord_game_sdk/discord_lobby_transaction.gdns"
 }, {
-"base": "Reference",
+"base": "",
 "class": "DiscordOverlayManager",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_overlay_manager.gdns"
+"path": "res://addons/discord_game_sdk/discord_overlay_manager.gdns"
 }, {
-"base": "Reference",
+"base": "",
 "class": "DiscordPartySize",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_party_size.gdns"
+"path": "res://addons/discord_game_sdk/discord_party_size.gdns"
 }, {
 "base": "Reference",
 "class": "DiscordResult",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_result.gdns"
+"path": "res://addons/discord_game_sdk/discord_result.gdns"
 }, {
-"base": "",
+"base": "Reference",
 "class": "DiscordUser",
 "language": "NativeScript",
-"path": "res://addons/discord_sdk/discord_user.gdns"
+"path": "res://addons/discord_game_sdk/discord_user.gdns"
 }, {
 "base": "Resource",
 "class": "GameState",
@@ -110,13 +110,13 @@ _global_script_class_icons={
 
 [application]
 
-config/name="HATeMON - A Pug's Tail"
+config/name="Discord Game SDK"
 run/main_scene="res://lobby.tscn"
 config/icon="res://icon.png"
 
 [autoload]
 
-Discord="*res://addons/discord_sdk/discord.gd"
+Discord="*res://addons/discord_game_sdk/discord.gd"
 
 [display]
 
