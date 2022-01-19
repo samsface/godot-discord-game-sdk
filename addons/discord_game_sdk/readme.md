@@ -45,5 +45,5 @@ func create_lobby():
 		return
 
 	var lobby = result.data	
-	Discord.lobby_manager.send_message(lobby.get_id(), "hello people!")
+	Discord.lobby_manager.send_lobby_message(lobby.get_id(), "hello people!")
 ```
