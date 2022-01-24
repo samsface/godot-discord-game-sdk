@@ -1,6 +1,6 @@
 # Godot-Discord-Game-SDK 🥏🎶
 
-> **Godot Discord Game SDK integration using GDNative.** Supports 💰Windows, 🐧Linux & 🍏MacOS (x86_x64 only).
+> **Godot Discord Game SDK integration using GDNative.** Supports 💰Windows & 🐧Linux.
 
 ## Getting Started
 1. Download the [example project](https://github.com/samsface/godot-discord-game-sdk/archive/refs/heads/master.zip).
