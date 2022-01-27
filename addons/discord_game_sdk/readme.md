@@ -7,6 +7,10 @@
 1. Download the Discord Game SDK following the offical [Discord Game SDK documenation](https://discord.com/developers/docs/game-sdk/sdk-starter-guide) and extract any .so, .dll or .dylib files into the sample project's addons/discord_game_sdk directory.
 3. Start the sample project! The Godot API is verbatim almost to the offical API so just follow the offical documenation.
 
+### Or checkout this little tutorial on getting started:
+
+[![Watch the video](https://img.youtube.com/vi/vHxXwpoLVGU/0.jpg)](https://www.youtube.com/watch?v=vHxXwpoLVGU)
+
 ## Snippets
 
 ### Updating activity
