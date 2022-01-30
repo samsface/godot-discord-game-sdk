@@ -288,6 +288,40 @@ public:
     }
 };
 
+class DiscordActivityTimestamps : public discord_to_godot_t<DiscordActivityTimestamps, discord::ActivityTimestamps>
+{
+    GODOT_CLASS(DiscordActivityTimestamps, Reference)
+
+public:
+    void set_start(std::int64_t value)
+    {
+        call(&discord_type::SetStart, value);
+    }
+
+    auto get_start()
+    {
+        return call(&discord_type::GetStart);
+    }
+
+    void set_end(std::int64_t value)
+    {
+        call(&discord_type::SetEnd, value);
+    }
+
+    auto get_end()
+    {
+        return call(&discord_type::GetEnd);
+    }
+
+    static void _register_methods()
+    {
+        register_method("set_start", &DiscordActivityTimestamps::set_start);
+        register_method("get_start", &DiscordActivityTimestamps::get_start);
+        register_method("set_end", &DiscordActivityTimestamps::set_end);
+        register_method("get_end", &DiscordActivityTimestamps::get_end);
+    }
+};
+
 class DiscordActivity : public Reference
 {
     GODOT_CLASS(DiscordActivity, Reference)
@@ -345,6 +379,11 @@ public:
         return DiscordActivityParty::bind(data_.GetParty());
     }
 
+    auto get_timestamps()
+    {
+        return DiscordActivityTimestamps::bind(data_.GetTimestamps());
+    }
+
     static void _register_methods()
     {
         register_method("set_type", &DiscordActivity::set_type);
@@ -356,6 +395,7 @@ public:
         register_method("get_assets", &DiscordActivity::get_assets);
         register_method("get_secrets", &DiscordActivity::get_secrets);
         register_method("get_party", &DiscordActivity::get_party);
+        register_method("get_timestamps", &DiscordActivity::get_timestamps);
     }
 
     void _init()
@@ -842,6 +882,7 @@ extern "C" void GDN_EXPORT godot_nativescript_init(void *handle)
     godot::register_class<godot::DiscordPartySize>();
     godot::register_class<godot::DiscordActivityParty>();
     godot::register_class<godot::DiscordActivitySecrets>();
+    godot::register_class<godot::DiscordActivityTimestamps>();
     godot::register_class<godot::DiscordActivity>();
     godot::register_class<godot::DiscordActivityManager>();
     godot::register_class<godot::DiscordOverlayManager>();

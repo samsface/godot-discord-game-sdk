@@ -145,6 +145,9 @@ class Activity extends Proxy_:
 	func get_party() -> DiscordActivityParty:
 		return object_to_proxy_.get_party()
 
+	func get_timestamps() -> DiscordActivityTimestamps:
+		return object_to_proxy_.get_timestamps()
+
 class ActivityManager_ extends Proxy_:
 	signal activity_join
 	signal activity_invite
