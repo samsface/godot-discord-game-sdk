@@ -802,16 +802,19 @@ class DiscordCore : public Reference
     std::unique_ptr<discord::Core> data_;
 
 public:
-    void create(std::int64_t application_id)
+    void create(std::int64_t application_id, int flags)
     {
         discord::Core* core{};
-        discord::Result res = discord::Core::Create(application_id, DiscordCreateFlags_Default, &core);
+        discord::Result res = discord::Core::Create(application_id, flags, &core);
         data_.reset(core);
 
-        data_->SetLogHook(discord::LogLevel::Info, [&](auto level, char const* message)
+        if(data_)
         {
-            emit_signal("log", String(message));
-        });
+            data_->SetLogHook(discord::LogLevel::Info, [&](auto level, char const* message)
+            {
+                emit_signal("log", String(message));
+            });
+        }
     }
 
     void run_callbacks()
